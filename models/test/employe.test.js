@@ -1,30 +1,77 @@
-const Employee = require('../employee.model');
+const Employee = require('../employees.model.js');
 const expect = require('chai').expect;
 const mongoose = require('mongoose');
 
 describe('Employee', () => {
-
-  it('should should throw an error, if at least one parameter is missing', () => {
-    const emp = new Employee({})
+  it('should throw an error if no arg', () => {
+    const emp = new Employee({});
+  
     emp.validate(err => {
-      expect(err.errors.firstName && err.errors.lastName && err.errors.department).to.exist;
-    });    
-  })
+      expect(err).to.exist;
+    });
+  });
 
-  it('should throw an error, if any parameter is not a string', () => {
-    const cases = [{}, []];
-    for(let param of cases){
-      const emp = new Employee({firstName: param, lastName: param, department: param})
-      emp.validate(err => {
-        expect(err.errors.firstName && err.errors.lastName && err.errors.department).to.exist;
-      })
-    }
-  })
+  it('should throw an error if not all args', () => {
+    const firstName = 'Mark';
+    const lastName = 'Ronson'
+    const department = 'curtains';
+    let emp = new Employee({firstName, lastName});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
 
-  it('should throw NO error, if parameters are correct', () => {
-    const emp = new Employee({firstName: 'name', lastName: 'surname', department: 'IT'})
-      emp.validate(err => {
-        expect(err).to.not.exist;
-    })
-  })
+    emp = new Employee({firstName});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
+
+    emp = new Employee({department, lastName});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
+  });
+
+  it('should throw an error if any argument is not a string', () => {
+    const string = 'string';
+    const number = 2;
+    const object = {};
+    const undef = undefined;
+    
+    let emp = new Employee({string, number, object});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
+
+    emp = new Employee({undef, string, string});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
+
+    emp = new Employee({string, string, object});
+  
+    emp.validate(err => {
+      expect(err).to.exist;
+    });
+  });
+
+  it('should return proper Employee object if the args are correct', () => {
+    const firstName = 'Mark';
+    const lastName = 'Bob';
+    const department = 'carpentry';
+
+    const emp = new Employee({firstName, lastName, department});
+    
+    emp.validate(err => {
+      expect(err).to.not.exist;
+    });
+  });
+
+  after(() => {
+    mongoose.models = {};
+  });
 });
